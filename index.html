@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Pair Matching Game</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            flex-direction: column;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, 100px);
+            grid-template-rows: repeat(5, 100px);
+            gap: 10px;
+        }
+        .card {
+            width: 100px;
+            height: 100px;
+            background-color: #3498db;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            border-radius: 10px;
+            user-select: none;
+        }
+        .hidden {
+            visibility: hidden;
+        }
+    </style>
+</head>
+<body>
+    <h1>Card Matching Game</h1>
+    <div class="grid" id="gameBoard"></div>
+    <button onclick="startGame()">New Game</button>
+
+    <script>
+        let cards = [];
+        let firstCard = null;
+        let secondCard = null;
+        let lockBoard = false;
+        
+        function generateCards() {
+            let values = [];
+            for (let i = 1; i <= 12; i++) { // 12 pairs, 1 extra card
+                values.push(i, i);
+            }
+            values.push(0); // Extra unmatched card for 5x5 grid
+            values.sort(() => Math.random() - 0.5);
+            return values;
+        }
+
+        function createBoard() {
+            const board = document.getElementById("gameBoard");
+            board.innerHTML = "";
+            cards = generateCards();
+            cards.forEach((value, index) => {
+                const card = document.createElement("div");
+                card.classList.add("card");
+                card.dataset.value = value;
+                card.dataset.index = index;
+                card.innerHTML = "?";
+                card.addEventListener("click", flipCard);
+                board.appendChild(card);
+            });
+        }
+
+        function flipCard() {
+            if (lockBoard || this.classList.contains("hidden")) return;
+            this.innerHTML = this.dataset.value;
+            
+            if (!firstCard) {
+                firstCard = this;
+            } else {
+                secondCard = this;
+                lockBoard = true;
+                setTimeout(checkMatch, 500);
+            }
+        }
+
+        function checkMatch() {
+            if (firstCard.dataset.value === secondCard.dataset.value) {
+                firstCard.classList.add("hidden");
+                secondCard.classList.add("hidden");
+            } else {
+                firstCard.innerHTML = "?";
+                secondCard.innerHTML = "?";
+            }
+            firstCard = null;
+            secondCard = null;
+            lockBoard = false;
+        }
+
+        function startGame() {
+            firstCard = null;
+            secondCard = null;
+            lockBoard = false;
+            createBoard();
+        }
+
+        startGame();
+    </script>
+</body>
+</html>
